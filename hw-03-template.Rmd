@@ -62,25 +62,57 @@ gss16_advfront <- gss16_advfront %>%
 #### Exercise 1 (a)
 
 ```{r}
-# replace this with your code
-```
 
-*Your answer here*
+lm_spec <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
+
+fit_ex1 <- lm_spec %>%
+  fit(emailhr ~ educ, data = gss16_advfront)
+
+
+fit_ex1 %>% tidy()
+fit_ex1 %>% glance()
+
+```
+emailhr = -2.7573 + 0.6855 *educ. One additional year of education is associated with an average increase of 0.6855 hours per week spent on email.The R^2 value is 0.0291, meaning years of education explains approximately 2.91% of the variation in weekly email hours. The overall F-test is statistically significant (p < 0.001), yet the low R^2 shows `educ` is a weak predictor of `emailhr`.
 
 #### Exercise 1 (b)
 
 ```{r}
-# replace this with your code
+library(ggplot2)
+library(broom)
+
+aug_ex1 <- augment(fit_ex1, new_data = gss16_advfront) %>%
+  mutate(resid = emailhr - .pred)
+
+# Residual vs fitted (.pred) plot
+ggplot(aug_ex1, aes(x = .pred, y = resid)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, colour = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals against fitted values")
+
+# QQ plot for residuals
+ggplot(aug_ex1, aes(sample = resid)) +
+  geom_qq() +
+  geom_qq_line(colour = "red") +
+  labs(title = "Q-Q plot of residuals")
+
+
 ```
 
-*Your answer here*
+Linearity: No obvious curve, linearity assumption holds.
+Homoscedasticity: Residual variance increases with fitted values → heteroscedastic, assumption violated.
+Normality: QQ plot deviates from the line at both tails; residuals are not normally distributed.
+Conclusion: The model violates homoscedasticity and normality assumptions. Interpret hypothesis tests carefully.
 
 ## Exercise 2: Compare two linear models
 
 #### Exercise 2 (a)
 
 ```{r}
-# replace this with your code
+
 ```
 
 #### Exercise 2 (b)
