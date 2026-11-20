@@ -455,11 +455,63 @@ assumptions. Interpret hypothesis tests carefully.</p>
 <h2>Exercise 2: Compare two linear models</h2>
 <div id="exercise-2-a" class="section level4">
 <h4>Exercise 2 (a)</h4>
-</div>
-<div id="exercise-2-b" class="section level4">
-<h4>Exercise 2 (b)</h4>
-<pre class="r"><code># replace this with your code</code></pre>
-<p><em>Your answer here</em></p>
+<pre class="r"><code>multi_spec &lt;- linear_reg() %&gt;%
+  set_engine(&quot;lm&quot;) %&gt;%
+  set_mode(&quot;regression&quot;)
+
+multi_fit &lt;- fit(multi_spec, emailhr ~ educ + polviews, data = gss16_advfront)
+multi_fit %&gt;% tidy()</code></pre>
+<pre><code>## # A tibble: 4 × 5
+##   term             estimate std.error statistic       p.value
+##   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+## 1 (Intercept)        -3.10      1.74     -1.78  0.0756       
+## 2 educ                0.704     0.118     5.99  0.00000000285
+## 3 polviewsModerate    0.433     0.758     0.571 0.568        
+## 4 polviewsLiberal    -0.284     0.813    -0.349 0.727</code></pre>
+<pre class="r"><code>multi_fit %&gt;% glance()</code></pre>
+<pre><code>## # A tibble: 1 × 12
+##   r.squared adj.r.squared sigma statistic     p.value    df logLik   AIC   BIC
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1    0.0298        0.0273  10.9      12.0 0.000000101     3 -4457. 8925. 8950.
+## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<p>The multiple regression of <code>emailhr</code> on <code>educ</code>
+and categorical <code>polviews</code> (reference = Conservative) yields:
+emailhr=-3.1036 + 0.7041educ + 0.4329Moderate -0.2842Liberal.</p>
+<p>Education has a significant positive coefficient: each extra year of
+education predicts +0.7041 email hours per week, holding political views
+constant. Moderate and liberal political views are not significantly
+different from conservative views after controlling for education.
+R^2=0.0298, meaning the predictors explain very little of the variation
+in email hours. #### Exercise 2 (b)</p>
+<pre class="r"><code>mod_reduced &lt;- lm(emailhr ~ educ, data = gss16_advfront)
+mod_full &lt;- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+anova(mod_reduced, mod_full)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: emailhr ~ educ
+## Model 2: emailhr ~ educ + polviews
+##   Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)
+## 1   1170 138100                           
+## 2   1168 138000  2       100 0.4232  0.655</code></pre>
+<p>We carry out a partial F-test to assess whether the categorical
+variable <code>polviews</code> contributes additional explanatory power
+to the model that already contains <code>educ</code>.</p>
+<ul>
+<li>Reduced model: <code>emailhr ~ educ</code></li>
+<li>Full model: <code>emailhr ~ educ + polviews</code></li>
+</ul>
+<p>Hypotheses: H0: The coefficients for Moderate and Liberal are both
+equal to zero. After controlling for education, political views have no
+association with weekly email hours. H1: At least one coefficient for
+political views is non-zero.</p>
+<p>From the ANOVA output, F = 0.4232, numerator df = 2, p = 0.655. Since
+the p-value is greater than 0.05, we fail to reject the null
+hypothesis.</p>
+<p>Conclusion: <code>polviews</code> is not jointly statistically
+significant conditional on education. Adding political views does not
+significantly improve model fit. This finding is consistent with the
+individual non-significant t-tests for the two dummy variables of
+<code>polviews</code> in part 2a.</p>
 </div>
 </div>
 <div id="exercise-3-create-a-workflow-to-fit-a-model" class="section level2">

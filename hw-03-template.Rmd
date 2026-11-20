@@ -113,16 +113,46 @@ Conclusion: The model violates homoscedasticity and normality assumptions. Inter
 
 ```{r}
 
-```
+multi_spec <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
 
+multi_fit <- fit(multi_spec, emailhr ~ educ + polviews, data = gss16_advfront)
+multi_fit %>% tidy()
+multi_fit %>% glance()
+
+
+
+```
+The multiple regression of `emailhr` on `educ` and categorical `polviews` (reference = Conservative) yields:
+emailhr=-3.1036 + 0.7041educ + 0.4329Moderate -0.2842Liberal.
+
+Education has a significant positive coefficient: each extra year of education predicts +0.7041 email hours per week, holding political views constant.
+Moderate and liberal political views are not significantly different from conservative views after controlling for education.
+R^2=0.0298, meaning the predictors explain very little of the variation in email hours.
 #### Exercise 2 (b)
 
 ```{r}
-# replace this with your code
+mod_reduced <- lm(emailhr ~ educ, data = gss16_advfront)
+mod_full <- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+anova(mod_reduced, mod_full)
+
 ```
 
 
-*Your answer here*
+We carry out a partial F-test to assess whether the categorical variable `polviews` contributes additional explanatory power to the model that already contains `educ`.
+
+- Reduced model: `emailhr ~ educ`
+- Full model: `emailhr ~ educ + polviews`
+
+Hypotheses:
+H0: The coefficients for Moderate and Liberal are both equal to zero. After controlling for education, political views have no association with weekly email hours.
+H1: At least one coefficient for political views is non-zero.
+
+From the ANOVA output, F = 0.4232, numerator df = 2, p = 0.655.
+Since the p-value is greater than 0.05, we fail to reject the null hypothesis.
+
+Conclusion: `polviews` is not jointly statistically significant conditional on education. Adding political views does not significantly improve model fit. This finding is consistent with the individual non-significant t-tests for the two dummy variables of `polviews` in part 2a.
 
 ## Exercise 3: Create a workflow to fit a model
 
