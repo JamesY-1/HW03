@@ -166,18 +166,41 @@ gss16_test  <- testing(gss16_split)
 #### Exercise 3 (a)
 
 ```{r}
-# replace this with your code
+mod_full <- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+par(mfrow=c(2,2))
+plot(mod_full)
+
 ```
 
-*Your answer here*
+We assess the OLS assumptions for the regression model emailhr~educ + polviews using four residual diagnostic plots:
+
+1. Residuals vs Fitted plot: Residuals spread wider as fitted values increase, showing a funnel shape. This indicates heteroscedasticity. No obvious curved pattern is observed, so the linearity assumption is roughly reasonable.
+2. Normal Q-Q plot: The points deviate substantially from the reference line in the upper tail. The residuals are right‑skewed, so the normality assumption is violated.
+3. Scale-Location plot: The smoothed red line slopes upward. The variability of standardised residuals rises with fitted values, confirming heteroscedasticity.
+4. Residuals vs Leverage plot: Several observations (e.g. 102, 104) have large standardised residuals and are outliers. However, they do not cross the Cook’s distance contours, meaning they are not highly influential points.
+
+Conclusion: The model fails the normality and homoscedasticity assumptions. The linearity assumption holds approximately, and there are no severe influential observations.
 
 #### Exercise 3 (b)
 
 ```{r}
-# replace this with your code
+library(sandwich)
+library(lmtest)
+
+mod_full <- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+robust_se <- vcovHC(mod_full, type = "HC3")
+coeftest(mod_full, vcov = robust_se)
+
+
 ```
 
-*Your answer here*
+This table shows coefficient t-tests using HC3 robust standard errors to account for heteroscedasticity.
+
+- The intercept is -3.1036 and statistically significant (p=0.0436).
+- `educ` has a coefficient of 0.7041 and is highly significant (p<0.001). Holding political views constant, one additional year of education is associated with an average increase of 0.704 hours of weekly email time.
+- `polviewsModerate` (beta=0.4329, p=0.5701) and `polviewsLiberal` (beta=-0.2842,p=0.7293) are both statistically insignificant at the 5% level. There is no significant difference in weekly email hours between moderate/liberal respondents and the conservative reference group.
+
+Conclusion: After robust correction, education remains a significant positive predictor. Political views show no significant association with email hours, consistent with the partial F-test result from 2b.
 
 ## Exercise 4: Performance of a logistic regression
 
