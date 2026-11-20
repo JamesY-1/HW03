@@ -595,13 +595,110 @@ email hours, consistent with the partial F-test result from 2b.</p>
 <h2>Exercise 4: Performance of a logistic regression</h2>
 <div id="exercise-4-a" class="section level4">
 <h4>Exercise 4 (a)</h4>
-<pre class="r"><code># replace this with your code</code></pre>
-<p><em>Your answer here</em></p>
+<pre class="r"><code>mod_interact &lt;- lm(emailhr ~ educ + polviews + educ:polviews, data = gss16_advfront)
+summary(mod_interact)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = emailhr ~ educ + polviews + educ:polviews, data = gss16_advfront)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -11.479  -5.980  -4.123   1.675  82.868 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           -4.29210    2.91885  -1.470 0.141703    
+## educ                   0.78858    0.20369   3.871 0.000114 ***
+## polviewsModerate       3.36251    4.03032   0.834 0.404282    
+## polviewsLiberal        0.18976    4.26509   0.044 0.964521    
+## educ:polviewsModerate -0.21275    0.28632  -0.743 0.457602    
+## educ:polviewsLiberal  -0.03609    0.29021  -0.124 0.901055    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 10.88 on 1166 degrees of freedom
+## Multiple R-squared:  0.03035,    Adjusted R-squared:  0.02619 
+## F-statistic: 7.299 on 5 and 1166 DF,  p-value: 9.581e-07</code></pre>
+<pre class="r"><code>library(sandwich)
+library(lmtest)
+robust_interact_vcov &lt;- vcovHC(mod_interact, type = &quot;HC3&quot;)
+coeftest(mod_interact, vcov = robust_interact_vcov)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                       Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)           -4.29211    2.71157 -1.5829 0.1137185    
+## educ                   0.78858    0.20270  3.8903 0.0001058 ***
+## polviewsModerate       3.36251    3.81853  0.8806 0.3787288    
+## polviewsLiberal        0.18976    3.71408  0.0511 0.9592615    
+## educ:polviewsModerate -0.21275    0.28144 -0.7559 0.4498371    
+## educ:polviewsLiberal  -0.03609    0.26579 -0.1358 0.8920183    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>mod_full &lt;- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+anova(mod_full, mod_interact)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: emailhr ~ educ + polviews
+## Model 2: emailhr ~ educ + polviews + educ:polviews
+##   Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)
+## 1   1168 138000                           
+## 2   1166 137925  2    74.896 0.3166 0.7287</code></pre>
+<p>We estimate a regression model including interaction terms between
+<code>educ</code> and <code>polviews</code> to test whether the
+association between education and weekly email hours differs by
+political views, with conservative respondents as the reference
+group.</p>
+<ul>
+<li>The coefficient on <code>educ</code> is 0.7886 and highly
+significant (p&lt;0.001). For conservative respondents, one additional
+year of education is associated with an average increase of 0.7886 hours
+of weekly email time.</li>
+<li>The main terms for moderate and liberal political views are
+statistically insignificant.</li>
+<li>The two interaction terms <code>educ:polviewsModerate</code>
+(beta=-0.2128,p=0.4498) and <code>educ:polviewsLiberal</code>
+(beta=-0.0361,p=0.8920) are individually insignificant.</li>
+<li>The partial F-test for joint significance of the two interaction
+terms yields F=0.3166,p=0.7287&gt;0.05.</li>
+</ul>
+<p>Conclusion: We fail to find evidence that the effect of education on
+email hours varies across political groups. Adding these interaction
+terms does not improve the model.</p>
 </div>
 <div id="exercise-4-b" class="section level4">
 <h4>Exercise 4 (b)</h4>
-<pre class="r"><code># replace this with your code</code></pre>
-<p><em>Your answer here</em></p>
+<pre class="r"><code>mod_full &lt;- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+mod_interact &lt;- lm(emailhr ~ educ + polviews + educ:polviews, data = gss16_advfront)
+
+anova(mod_full, mod_interact)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: emailhr ~ educ + polviews
+## Model 2: emailhr ~ educ + polviews + educ:polviews
+##   Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)
+## 1   1168 138000                           
+## 2   1166 137925  2    74.896 0.3166 0.7287</code></pre>
+<pre class="r"><code>AIC(mod_full, mod_interact)</code></pre>
+<pre><code>##              df      AIC
+## mod_full      5 8924.724
+## mod_interact  7 8928.088</code></pre>
+<pre class="r"><code>BIC(mod_full, mod_interact)</code></pre>
+<pre><code>##              df      BIC
+## mod_full      5 8950.056
+## mod_interact  7 8963.553</code></pre>
+<p>We compare the main-effect model and the interaction model using the
+partial F-test, AIC and BIC. The partial F-test for joint significance
+of the two interaction terms gives F=0.3166,p=0.7287&gt;0.05. AIC is
+8924.724 for the main-effect model and 8928.088 for the interaction
+model. BIC is 8950.056 for the main-effect model and 8963.553 for the
+interaction model.</p>
+<p>Since lower AIC and BIC indicate better-fitting models, both
+information criteria favour the simpler main-effect specification.
+Adding interaction terms does not improve model fit and increases the
+information criteria. Therefore, we select the main-effect model from
+part 2a. We find no statistical evidence that the education effect on
+weekly email hours differs by political views.</p>
 </div>
 </div>
 

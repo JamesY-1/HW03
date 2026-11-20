@@ -207,17 +207,49 @@ Conclusion: After robust correction, education remains a significant positive pr
 #### Exercise 4 (a)
 
 ```{r}
-# replace this with your code
+
+mod_interact <- lm(emailhr ~ educ + polviews + educ:polviews, data = gss16_advfront)
+summary(mod_interact)
+
+
+library(sandwich)
+library(lmtest)
+robust_interact_vcov <- vcovHC(mod_interact, type = "HC3")
+coeftest(mod_interact, vcov = robust_interact_vcov)
+
+
+mod_full <- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+anova(mod_full, mod_interact)
+
 ```
 
-*Your answer here*
+We estimate a regression model including interaction terms between `educ` and `polviews` to test whether the association between education and weekly email hours differs by political views, with conservative respondents as the reference group.
+
+- The coefficient on `educ` is 0.7886 and highly significant (p<0.001). For conservative respondents, one additional year of education is associated with an average increase of 0.7886 hours of weekly email time.
+- The main terms for moderate and liberal political views are statistically insignificant.
+- The two interaction terms `educ:polviewsModerate` (beta=-0.2128,p=0.4498) and `educ:polviewsLiberal` (beta=-0.0361,p=0.8920) are individually insignificant.
+- The partial F-test for joint significance of the two interaction terms yields F=0.3166,p=0.7287>0.05.
+
+Conclusion: We fail to find evidence that the effect of education on email hours varies across political groups. Adding these interaction terms does not improve the model.
 
 #### Exercise 4 (b)
 
 ```{r}
-# replace this with your code
+mod_full <- lm(emailhr ~ educ + polviews, data = gss16_advfront)
+mod_interact <- lm(emailhr ~ educ + polviews + educ:polviews, data = gss16_advfront)
+
+anova(mod_full, mod_interact)
+
+AIC(mod_full, mod_interact)
+BIC(mod_full, mod_interact)
+
 ```
 
-*Your answer here*
+We compare the main-effect model and the interaction model using the partial F-test, AIC and BIC.
+The partial F-test for joint significance of the two interaction terms gives F=0.3166,p=0.7287>0.05.
+AIC is 8924.724 for the main-effect model and 8928.088 for the interaction model.
+BIC is 8950.056 for the main-effect model and 8963.553 for the interaction model.
+
+Since lower AIC and BIC indicate better-fitting models, both information criteria favour the simpler main-effect specification. Adding interaction terms does not improve model fit and increases the information criteria. Therefore, we select the main-effect model from part 2a. We find no statistical evidence that the education effect on weekly email hours differs by political views.
 
 
